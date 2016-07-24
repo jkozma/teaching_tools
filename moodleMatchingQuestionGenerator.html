@@ -1,0 +1,277 @@
+
+<html>
+<head>
+<script>
+//var intrms = [];//array of vocabulary terms
+var shopt = 0;
+var showinghelp = 0;
+//function to delete array elements of a specified value
+//used to remove blank lines from input
+Array.prototype.clean = function(deleteValue) {
+  for (var i = 0; i < this.length; i++) {
+    if (this[i] == deleteValue) {         
+      this.splice(i, 1);
+      i--;
+    }
+  }
+  return this;
+};
+//randomly order the elements of an array
+Array.prototype.shuffle = function() {
+var s = [];
+while (this.length) s.push(this.splice(Math.random() * this.length, 1)[0]);
+while (s.length) this.push(s.pop());
+return this;
+};
+//convert text to an array, with each line as an array element
+function textareaToArray(t){
+return t.value.split(/[\n\r]+/);
+}
+//pad number with leading zeros to specified length
+//used to make question numbers in titles sort correctly
+function zfill1(number, size) {
+  number = number.toString();
+  while (number.length < size) number = "0" + number;
+  return number;
+}
+function showHideOptions(){
+  if (document.getElementById("options").style.display == "block") {
+    //shopt = 1;
+	document.getElementById("showoptions").innerHTML = "Show Options";
+	document.getElementById("options").style.display = "none";
+  }else {
+    //shopt = 0;
+    document.getElementById("showoptions").innerHTML = "Hide Options";
+	document.getElementById("options").style.display = "block";
+  }
+}
+function hideallhelp(){
+  var i;
+  var objs = document.getElementsByClassName("help");
+  for (i = 0; i < objs.length; i++) { objs.item(i).style.display = "none"; }
+  objs = document.getElementsByClassName("helpbtn");
+  for (i = 0; i < objs.length; i++) { objs.item(i).innerHTML = "Help"; }
+  showinghelp = 0;
+}
+function showhelp(btn,topic){
+  if ( btn.innerHTML == "Help") {
+    showinghelp++;
+	btn.innerHTML = "Hide Help";
+	//alert(document.getElementById(topic).tagName);
+	if ( document.getElementById(topic).tagName == "TR" ) {
+	  //alert(document.getElementById(topic).tagName);
+	  document.getElementById(topic).style.display = "table-row";
+	}else{
+      document.getElementById(topic).style.display = "block";
+	}
+  }else {
+    showinghelp--;
+	btn.innerHTML = "Help";
+    document.getElementById(topic).style.display = "none";
+  }
+  if (showinghelp == 0) {
+    document.getElementById("hidehelpbtn").style.display = "none";
+  }else{
+    document.getElementById("hidehelpbtn").style.display = "block";
+  }
+}
+function updatetitleoptions() {
+  //update visibility of title options titletextlastshowoption and 
+  //when changes are made to qtitle or excludetitleterms
+  document.getElementById("qtitle").value = document.getElementById("qtitle").value.replace(/^\s+|\s+$/g,'')
+  if ( document.getElementById("qtitle").value != "" && !document.getElementById("excludetitleterms").checked ){
+    document.getElementById("titletextlastshowoption").style.display = "block";
+  }else{
+    document.getElementById("titletextlastshowoption").style.display = "none";
+  }
+}
+function generateQuestions(){
+  if (document.getElementById("options").style.display == "block") { showHideOptions(); }
+  hideallhelp();
+  var trms = textareaToArray(document.getElementById("intext"));
+  trms = trms.clean(""); //remove blank lines
+  trms.shuffle();
+  var s = document.getElementById("separator").value;
+  var f = document.getElementById("feedback").value;
+  var d = document.getElementById("ndefs").value;
+  var x = document.getElementById("nxtrms").value;
+  var n = trms.length;
+  var q = Math.floor (n/d);
+  var q0 = document.getElementById("qnum").value;
+  var i, j, k, m;
+  var fdbak = [];
+  for (i=0; i < n; i++) {
+	//split feedback from input
+	if (f != ""){
+	  //The following commented out statements split at the FIRST instance of the feedback separator
+	  //then rejoin the latter elements by the feedback separator, if equal to the term-definition sepatator
+	  //or by a space otherwise
+	  //fdbak[i] = trms[i].split(f);
+	  //j = fdbak[i].length;
+	  //trms[i] = fdbak[i][0];
+	  //fdbak[i].splice(0,1);
+	  //fdbak[i] = fdbak[i].join(f==s?f:" ");
+	  //The implemented statements below split at the LAST instance of the feedback generator
+	  //and recombine the elements before that separator
+	  //This allows the same separator to be used for both feedback and terms-definitions
+	  //provided EVERY line includes a feedback expression
+	  trms[i] = trms[i].split(f);
+	  j = trms[i].length;
+	  if (j > 1) {
+	    fdbak[i] = trms[i][j-1];
+	    trms[i].splice(j-1,1)
+	  }else{
+	    fdbak[i] = "";
+	  }
+	  trms[i] = trms[i].join(f)
+	}else{
+	  fdbak[i] = "";
+	}
+	//split remaining input into term(s) and definition
+	if (s == ""){
+	  trms[i] = trms[i].split(/\t/);
+	}else{
+	  trms[i] = trms[i].split(s);
+	}
+  }
+  document.getElementById("outext").innerHTML = "";
+  //show the list of terms, shuffled, without feedback
+  //document.getElementById("outext").innerHTML = q + " question(s) will be generated.<br>";
+  //for (i=0; i < trms.length; i++) {
+	//document.getElementById("outext").innerHTML += trms[i] + "<br>";
+  //}
+  //document.getElementById("outext").innerHTML += "<br><br><br>";
+  i = 0;
+  var fbktmp, ttltmp;
+  //preliminary formatting for question titles
+  var fixedtitle = (q0 == "") && document.getElementById("excludetitleterms").checked
+  var paddedtitle = " " + document.getElementById("qtitle").value;
+  if (paddedtitle == " ") { paddedtitle = "" }
+  var notitle = (paddedtitle == "" ) && fixedtitle
+  if (fixedtitle && !notitle) { paddedtitle = "::" + document.getElementById("qtitle").value + "::<br>"}
+  for (j = 0; j < q; j++){ //loop for each question generated
+    fbktmp = "####";//initialize feedback section
+	//output title, if applicable
+	if (!notitle) {
+      if (fixedtitle) {
+	    document.getElementById("outext").innerHTML += paddedtitle;
+	  }else{
+	    ttltmp = "::"
+	    if (q0 != "") { ttltmp += zfill1(j-(-q0), 2); }
+	    if (document.getElementById("excludetitleterms").checked) {
+	      ttltmp += paddedtitle;
+	    }else{
+	      if (document.getElementById("titletextlast").checked) {
+	        for (k=i; k<+i+ +d; k++) { ttltmp += " " + trms[k][0]; }
+		    ttltmp += paddedtitle;
+		  }else{
+		    ttltmp += paddedtitle;
+	        for (k=i; k<+i+ +d; k++) { ttltmp += " " + trms[k][0]; }
+	      }
+	    }
+		ttltmp = ttltmp.replace(":: ","::");
+	    document.getElementById("outext").innerHTML += ttltmp + "::<br>";
+	  }
+	}
+	//output question text and opening brace for answer items
+	document.getElementById("outext").innerHTML += document.getElementById("qtext").value + "<br>{<br>";
+	//loop for each term-definition item
+	//output each term and add feedback to fbktmp holding variable
+	for (k=i; k<+i+ +d; k++) {
+	  document.getElementById("outext").innerHTML += "&nbsp;&nbsp;=" + trms[k][trms[k].length - 1];
+	  document.getElementById("outext").innerHTML += "->" + trms[k][Math.floor(Math.random()*(trms[k].length - 1))] + "<br>";
+	  if ( fdbak[k] != "") { fbktmp += "<br>  &lt;br&gt;" + fdbak[k]}
+	}
+	i += +d; //advance i to next term in shuffled list
+	//output distractor terms
+	for (k=0; k<x; k++) {
+	  document.getElementById("outext").innerHTML += "&nbsp;&nbsp;=->" + trms[n-k<=i?i-n-(-k):k-(-i)][0] + "<br>";
+	}
+	//output feedback if applicable
+	if ( fbktmp != "####") { document.getElementById("outext").innerHTML += fbktmp + "<br>"; }
+	document.getElementById("outext").innerHTML += "}<br><br>";
+  }
+  //update next question number and add blank line for next question set
+  document.getElementById("qnum").value -= -q;
+  document.getElementById("outext").innerHTML += "<br>";
+  //select all output to copy to clipboard
+  window.getSelection().removeAllRanges();//moved
+  var range = document.createRange();
+  range.selectNode(document.getElementById("outext"));
+  window.getSelection().addRange(range);
+}
+</script>
+</head>
+<body>
+<p style="text-align:center">Enter list of vocabulary terms: </p>
+<p style="text-align:center"><textarea id="intext" rows="6" cols="70"></textarea></p>
+<div style="text-align:center"><button type="button" id="showoptions" onclick="showHideOptions()">Hide Options</button>
+<button type="button" onclick="generateQuestions()">Generate Questions</button>
+<button type="button" class="helpbtn" style="width:90px" onclick="showhelp(this,'generalhelp')">Help</button>
+<span style="display:inline-block"><button type="button" class="help" id="hidehelpbtn" style="display:none" onclick="hideallhelp()">Hide all help</button></span></div>
+<div id="generalhelp" class="help" style="color:#282;background-color:#efe;display:none;text-align:left;width:70%;margin-left:auto;margin-right:auto">
+<h3>General help</h3>
+<p>This script generates vocabulary matching questions in GIFT format to import into Moodle. Vocabulary terms from which you wish to create questions must be entered into the text area above. If you have, e.g., a list of terms and definitions from an Excel spreadsheet, you may copy and paste them.</p>
+<p>Terms must be entered one per line, with the term and corresponding definition on the same line separated by a tab. There should be no other tabs in the input, unless there are alternate terms for the same definition. For example:</p>
+<blockquote><textarea disabled="disabled" rows="6" cols="70" style="background-color:white">field-effect transistor&lt;tab&gt;FET&lt;tab&gt;an electronic device that uses an electric field to control the shape and hence the conductivity of a channel of one type of charge carrier in a semiconductor material</textarea></blockquote>
+<p>If you include alternate terms for the same definition, each time the definition is used, one of the alternate terms will be selected at random to be included in the question. Note that text will wrap in the text area, but you should not have any line breaks in the definition.</p>
+<p>Optionally, you may include feedback for each term, which will be displayed in accordance with the quiz and question settings when you use the questions in Moodle. For matching questions in Moodle, the feedback for all the terms is shown at the end of the question.</p>
+<p>There are a number of options you can set, including the question text, the number of terms and distractors for each question, or the separator characters used in the input. Click the help button next to each option input for more information.</p>
+<p>Note, though terms used as distractors may be used in more than one question, each definition will be used in at most one question. If the number of definitions in each question does not divide evenly into the total number of definitions entered, some terms will not be used. To make sure all the definitions appear at least once, you can generate multiple sets of questions. </p>
+<p>After entering all the vocabulary terms and setting the options as desired, click Generate Questions. The input list will be "shuffled"-- that is, the order of the terms will be randomized, and the Moodle formatted questions will appear at the bottom of the page. The script will select the formatted questions, but you must and copy them, e.g., by pressing Cntrl-C, then paste them into a text editor (e.g., Notepad). You must then save the output as a file to import into Moodle.</p>
+</div>
+<div  id="options" style="text-align:center;width:70%;margin-left:auto;margin-right:auto;display:block"><p>Revise question text if desired.
+<button type="button" class="helpbtn" style="width:90px" onclick="showhelp(this,'qtexthelp')">Help</button></p>
+<div class="help" style="text-align:left;color:#282;background-color:#efe;display:none" id="qtexthelp">
+<h3>Question Text</h3>
+<p>The same question text is used for all questions each time this script is used to generate questions. If you wish, you may edit the question text in the text area below.</p></div>
+<p><textarea id="qtext" rows="2" cols="70">Match each term with the correct definition.</textarea></p>
+<table style="text-align:left;margin-left:auto;margin-right:auto;border-collapse:collapse">
+<tr style="border:1px solid gray"><td style="text-align:right">Enter first question number for question title: </td>
+<td><input id="qnum" size="3" value="1"></td>
+<td><button type="button" class="helpbtn" style="width:90px" onclick="showhelp(this,'qnumhelp')">Help</button></td></tr>
+<tr class="help" id="qnumhelp" style="display:none">
+<td colspan="3" style="color:#282;background-color:#efe"><h3>Question Numbers</h3>
+<p>Sequential question numbers are included in the question title. If you want a different starting number, enter it in the text box above. If you do not want sequence numbers in the question titles, leave the starting question number text box blank.</p>
+<p>Note, when this script is loaded into your browser, the starting number is initialized to 1. When you generate questions, it is updated to the next number following the last question number generated.</p></td></tr>
+<tr style="border:1px solid gray"><td colspan="2" style="text-align:right">Enter text to include in question title:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+<input id="qtitle" size="50" value="" onblur="updatetitleoptions()">
+<p id="titletextlastshowoption" style="display:none"><input type="checkbox" id="titletextlast">Check to put title text <strong>after</strong> vocabulary terms in title. (Default is <strong>before</strong>)</p>
+<p><input type="checkbox" id="excludetitleterms" onchange="updatetitleoptions()">Check to <strong>exclude</strong> vocabulary terms from title. (<strong>Include</strong>d by default)</p></td>
+<td><button type="button" class="helpbtn" style="width:90px" onclick="showhelp(this,'qtitlehelp')">Help</button></td></tr>
+<tr class="help" id="qtitlehelp" style="display:none">
+<td colspan="3" style="color:#282;background-color:#efe"><h3>Question title text</h3>
+<p>You can specify text to include in the title of each matching question. Question titles can facilitate identification of questions for editing, inclusion in quizzes, etc. When GIFT formatted questions are imported into Moodle, titles are optionally enclosed in pairs of double colons. If no title is included, Moodle uses the question test as the title. Since the same question text is used for all the questions generated by this script, a title is recommended.</p>
+<p>There is no limit on the length of the title, but in many contexts within Moodle, the title is truncated, so a long title is not particularly useful. By default, this script generates a title from a sequential question number (see above) along with a list of the terms included in the question. Note that if you enter alternate terms for the same definition, the term in the title may be different from the one in the question, since the term in the question title is always the one listed first, but the one in the question is selected at random from all the available alternatives. If you do not want the terms to appear in the question title, uncheck the associated box.</p>
+<p>If you do include additional title text, you can specify whether it should appear before or after the terms. Note that this script will trim leading and trailing spaces from any question title text you enter.</p></td></tr>
+<tr style="border:1px solid gray"><td style="text-align:right">Enter number of definitions per question: </td>
+<td><input id="ndefs" size="3" value="5"></td>
+<td><button type="button" class="helpbtn" style="width:90px" onclick="showhelp(this,'ndefshelp')">Help</button></td></tr>
+<tr class="help" id="ndefshelp" style="display:none">
+<td colspan="3" style="color:#282;background-color:#efe"><h3>Definitions per question</h3>
+<p>You can specify how many vocabulary terms to include in each matching question. Moodle requires at least three (3) terms per question. You may specify a larger number, but if you enter a number larger than the total number of terms, no output will be generated.</p></td></tr>
+<tr style="border:1px solid gray"><td style="text-align:right">Enter number of extra terms (distractors) per question: </td>
+<td><input id="nxtrms" size="3" value="3"></td>
+<td><button type="button" class="helpbtn" style="width:90px" onclick="showhelp(this,'nxtrmshelp')">Help</button></td></tr>
+<tr class="help" id="nxtrmshelp" style="display:none">
+<td colspan="3" style="color:#282;background-color:#efe"><h3>Distractors</h3>
+<p>You can optionally specify how many "distractors"-- additional terms with no corresponding definitions-- to include in each question. The terms used as distractors will appear in the list of terms to match when the question is displayed in Moodle, but will not be a correct answer for any of the definitions. This script selects as distractors the terms from the shuffled input list following those used in the question with their definitions. Note, if the total number of definitions and distractors exceeds the total number of terms entered, some terms may be used both as correct answers and as distractors. The script does <strong>not</strong> check for this condition.</p></td></tr>
+<tr style="border:1px solid gray"><td style="text-align:right">Enter separator between terms and definitions, if other than tab: </td>
+<td><input id="separator" size="3"></td>
+<td><button type="button" class="helpbtn" style="width:90px" onclick="showhelp(this,'separatorhelp')">Help</button></td></tr>
+<tr class="help" id="separatorhelp" style="display:none">
+<td colspan="3" style="color:#282;background-color:#efe"><h3>Separator</h3>
+<p>You can specify a different character, such as a comma, to use as the seperator between alternate terms and the definition in the input. Whatever character you specify must <strong>not</strong> be used anywhere else in the input (except in feedback), or it will be interpreted as as a seperator.</p>
+<p>Depending on which browser and editing tool you use, you may not be able to enter tab characters directly in to the vocabulary list text area. This may be one reason to specify an alternate separator character, but you may be able to enter tabs by copying a single tab to the system clipboard, then pasting it as needed into the text area. You can also create the input list separately in a text editor, then copy and paste it all at once.</p></td></tr>
+<tr style="border:1px solid gray"><td style="text-align:right">Enter feedback separator, or leave blank if no feedback: </td>
+<td><input id="feedback" size="3" value="#"></td>
+<td><button type="button" class="helpbtn" style="width:90px" onclick="showhelp(this,'feedbackhelp')">Help</button></td></tr>
+<tr class="help" id="feedbackhelp" style="display:none">
+<td colspan="3" style="color:#282;background-color:#efe"><h3>Feedback</h3>
+<p>Although <a target="helpwindow" style="color:blue" href="http://docs.moodle.org/26/en/GIFT_format#Matching">Moodle docs</a> indicate that matching questions do not support feedback, and feedback cannot be specified for individual terms in the online question editor, it does appear possible to include overall feedback for the whole question. This script collates the feedback specified for each term used in the question (with definition only-- not distractors) as feedback for the whole question.</p>
+<p>By default, the pound sign (#) is used to indicate feedback both in this script and in the Moodle GIFT format (at least for matching questions). You can specify a different character, but if you are using the pound sign elswhere in your input, it may not import correctly. Also note that you can <strong>not</strong> use the same character to set off feedback and as a separator between terms and definitions (unless you specify feedback for <strong>every</strong> term.</p></td></tr>
+</table>
+</div>
+<pre id="outext" style="font:bold 1em monospace;background-color:#ddd;color:#222"></pre>
+</body>
+</html>
