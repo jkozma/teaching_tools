@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html>
+<body>
+
+<h3>Robot Arm Activity</h3>
+<p>The javascript on this page implements a simulated robot arm as described in the activity based on Exercise 4 in Chapter 3 of your text, with some parts of the code missing. You fill in the missing parts correctly to get the program to work.</p>
+<p>Recall that commands for the robot arm are as follows:</p>
+<blockquote><span style="font:bold 1em monospace">N</span> move in a straight line one unit toward the top of the paper ("North")<br><span style="font:bold 1em monospace">S</span> move one unit toward the bottom ("South")<br><span style="font:bold 1em monospace">E</span> move one unit to the right ("East")<br><span style="font:bold 1em monospace">W</span> move one unit to the left ("West")<br><span style="font:bold 1em monospace">U</span> lift pen from paper ("Up", stop writing)<br><span style="font:bold 1em monospace">D</span> lower pen to paper ("Down", start writing with next move)<br><span style="font:bold 1em monospace">H</span> lift pen and move to top left corner ("Home")</blockquote>
+<p>The code below, with the missing sections filled in correctly, has been tested using Google Chrome and Internet Explorer 10.x. It will work in Chrome, but <strong>not</strong> in IE 10, because IE 10 does not support the HTML <span style="font:bold 1em monospace">canvas</span> tag. The code has not been checked in IE 11, the most recent version.</p>
+<p>The questions in this activity are limited to features in the code that relate closely to concepts covered in class. You should find the javascript code for the missing parts of the program to be very similar, if not identical, to the pseudocode presented in your text. If you want to learn more about javascript and how it is used in web pages, a good source of information is <a target="helpwindow" style="color:blue" href="http://www.w3schools.com/">http://www.w3schools.com/</a>.</p>
+<p>After downloading this file from Moodle, you should first change the extension from .txt to .html so it will open as a web page in your web browser. Each of the missing sections of code you must fill in to get the robot arm simulation to work are signified by the placeholder "@@@". Note, the length of the missing sectins varies, and bears no relation to the length of the placeholder.</p>
+<p><strong style="background-color:yellow!important"><em>The extension for this file has already been changed to htm and the correct code for each of the placeholders inserted in accordance with the instructions above. To view the original lines with the placeholders, now commented out, and additional comments on how to input instructions and use the other interactive features, look at the source for this page.</em></strong></p>
+<!-- This is an html comment. Note that it is not displayed with the page in the browser window. The html markup below creates a canvas element, which is used as the "Robot drawing area" by the javascript code. Note that width and height of the canvas are included in its "declaration". -->
+<div style="margin-left:auto;margin-right:auto;width:320px;text-align:center">
+<h4>Robot drawing area:</h4>
+<p><strong>x:</strong> <input id="xout" type="text" size="4" disabled="disabled" />
+<strong>y:</strong> <input id="yout" type="text" size="4" disabled="disabled" /></p>
+<canvas id="myCanvas" width="320" height="120" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas></div>
+<!-- The input box below is used by the javascript code to get robot drawing instructions from the user, and the button is used to call the function that simulates the robot arm. The input boxes above the canvas, which are disabled so the web page user can't change their values, are used to display the current position of the robot arm. -->
+<div style="margin-left:auto;margin-right:auto;width:500px;text-align:center">
+<p>Input robot drawing arm instructions: <input id="instr" type="text" size="40"></p>
+<p><button onclick="robotArm()" type="button">Activate robot arm</button></p>
+<!-- The extra input boxes and button below allow the web page user to draw directly by  specifying delta x and y-->
+<p>Input delta x: <input id="xd" type="text" size="4"></p>
+<p>Input delta y: <input id="yd" type="text" size="4"></p>
+<p><button onclick="drawSegment(document.getElementById('xd').value, document.getElementById('yd').value)" type="button">Draw segment</button></p>
+</div>
+<script>
+// "Constant" ONE_INCH holds the number of pixels on the canvas
+// that will simulate a one inch move by the robot arm.
+var ONE_INCH = 50;
+// x and y store the "current position" of the robot arm.
+// They are initialized to a random value to demonstrate
+// the "junk" value you can get if you don't initialize
+// variables correctly
+var x = Math.floor((Math.random()-0.5) * 1000);
+document.getElementById("xout").value = x;
+var y = Math.floor((Math.random()-0.5) * 1000);
+document.getElementById("yout").value = y;
+// The penUp variable indicates whether the pen is up.
+var penUp = true;
+// The c and ctx object variables are used by the code
+// to access the drawing canvas
+var c = document.getElementById("myCanvas");
+// var xmax = c.width;
+// var ymax = c.height;
+var ctx = c.getContext("2d");
+ctx.lineWidth=3;
+
+/* The functions below define the actions taken for each
+   instruction code. Note that the "upper left corner"
+   starting position set by the home instruction is not
+   (0, 0), but rather (10, 10). This leaves a small margin
+   on the top and left edges of the drawing area.
+*/
+
+function home() {
+   penUp = true;
+   x = 10;
+   document.getElementById("xout").value = x;
+   y = 10;
+   document.getElementById("yout").value = y;
+   ctx.moveTo(x,y);
+   }
+
+function north() {
+   y = y - ONE_INCH;
+   document.getElementById("yout").value = y;
+   if (penUp) {
+      ctx.moveTo(x,y);
+	  }
+   else {
+      ctx.lineTo(x,y);
+      ctx.stroke();
+	  }
+   }
+
+function south() {
+//   y = y + @@@;
+   y = y + ONE_INCH;  
+   document.getElementById("yout").value = y;
+   if (penUp) {
+      ctx.moveTo(x,y);
+	  }
+   else {
+      ctx.lineTo(x,y);
+      ctx.stroke();
+	  }
+   }
+
+function east() {
+   x = x + ONE_INCH;
+   document.getElementById("xout").value = x;
+   if (penUp) {
+      ctx.moveTo(x,y);
+	  }
+   else {
+      ctx.lineTo(x,y);
+      ctx.stroke();
+	  }
+   }
+
+function west() {
+//   x = @@@;
+   x = x - ONE_INCH;
+   document.getElementById("xout").value = x;
+   if (penUp) {
+      ctx.moveTo(x,y);
+	  }
+   else {
+      ctx.lineTo(x,y);
+      ctx.stroke();
+	  }
+   }
+
+function up() {
+   penUp = true;
+   }
+
+function down() {
+//   penUp = @@@;
+   penUp = false;
+   }
+
+function drawSegment(xd, yd) {
+ctx.moveTo(x,y);
+// note "overloading" of "+" operator; 
+// unary "+" forces xd and yd to be interpreted as number types
+x = x + +xd;
+y = y + +yd;
+ctx.lineTo(x,y);
+ctx.stroke();
+}
+
+function robotArm() {
+   var instructions = document.getElementById('instr').value.split("");
+   var i;
+   for (i = 0; i < instructions.length; i++) {
+      switch (instructions[i][0]) {
+	     case "H":
+		    home();
+			break;
+//	     case "@@@":
+	     case "N":
+		    north();
+			break;
+//	     case "@@@":
+	     case "S":
+		    south();
+			break;
+//	     case "@@@":
+	     case "E":
+		    east();
+			break;
+//	     case "@@@":
+	     case "W":
+		    west();
+			break;
+//	     case "@@@":
+	     case "U":
+		    up();
+			break;
+	     case "D":
+		    down();
+			break;
+		 }
+	  }
+   }
+</script>
+</body>
+</html>
