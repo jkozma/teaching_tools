@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Hans Schmidt German Band: What are they Thinking?</title>
+</head>
+<body>
+<h3>What is the Hans Schmidt Band thinking about?</h3>
+<h4>Move the mouse over the band members to see!</h4>
+  <div id="maind" style="position:absolute;width:930px; height:570px">
+  <div id="bbld" style="visibility:hidden;position:absolute;">
+  <img id="bbli" src="cloud.png" border="0" style="position:absolute;"/>
+  <span id="bblp" style="font-size:25px;position:absolute;"></span>
+  </div>
+<div style="visibility:hidden;position:absolute">
+<table><tr><td>
+<p id="p0" style="font-size:25px;whiteSpace:nowrap"></p>
+</td></tr></table>
+</div>
+<img id="mainimg" src="HSGBthoughts.jpg" width="930" height="570" border="0" usemap="#talkHS" style="z-index:-2;" />
+<map id="talkHS" name="talkHS" >
+  <area shape="poly" coords="35,218,77,241,101,309,106,338,137,334,247,466,277,474,331,472,382,520,380,568,99,568,44,465,22,448,19,373,29,342,27,326,17,307,22,289,16,265,12,280,14,243,17,227" alt="Adolf" title="Adolf" href="https://en.wikipedia.org/wiki/Adolf" onmouseover="updateNext(0)" />
+  <area shape="poly" coords="135,233,158,227,177,229,194,263,209,271,189,298,171,335,105,280,120,261,123,243" alt="Rudolph" title="Rudolph" href="https://en.wikipedia.org/wiki/Rudolph" onmouseover="updateNext(1)" />
+  <area shape="poly" coords="321,188,342,199,348,217,346,227,350,241,377,249,375,263,350,266,345,269,329,383,348,417,328,413,310,417,296,416,295,380,281,312,286,278,298,268,312,251,300,236,293,206,299,195" alt="Gerhardt" title="Gerhardt" href="https://en.wikipedia.org/wiki/Gerhardt" onmouseover="updateNext(2)" />
+  <area shape="poly" coords="621,181,642,183,651,201,662,235,655,239,650,247,651,255,707,290,731,386,695,410,678,407,624,328,604,325,587,305,591,295,606,285,615,267,600,245,599,228,591,218,590,208,599,203,617,182" alt="Helmut" title="Helmut" href="https://en.wikipedia.org/wiki/Helmut" onmouseover="updateNext(3)" />
+  <area shape="poly" coords="861,186,896,183,915,219,913,230,919,236,911,256,918,272,929,280,929,376,915,416,902,447,891,457,875,507,768,523,775,553,768,568,738,568,707,521,707,489,669,480,667,529,642,424,765,422,776,396,768,382,751,378,731,331,735,322,734,305,734,306,746,317,760,331,759,345,778,345,830,281,856,269,847,231" alt="Wilhelm" title="Wilhelm" href="https://en.wikipedia.org/wiki/Wilhelm" onmouseover="updateNext(4)" />
+  <area shape="rect" coords="0,0,929,569" onmouseover="updateNext(-1)" />
+</map></div>
+<script type="text/javascript">
+var timer;
+var timerIsOn = false;
+var TIMER_DELAY = 1500;
+var curState = -1;
+var nextState = -1;
+var bblptr = new Array();
+for (var i = 0; i < 5; i++) {
+  bblptr[i] = new Array();
+  for (var ix = 0; ix < 6; ix+=2) {
+    bblptr[i][ix] = document.createElement("div");
+	document.getElementById("maind").appendChild(bblptr[i][ix]);
+	bblptr[i][ix].style.position = "absolute";
+    bblptr[i][ix+1] = document.createElement("img");
+	bblptr[i][ix].appendChild(bblptr[i][ix+1]);
+    bblptr[i][ix+1].src = "xyz.png"
+	}
+  }
+var ptrAnch=new Array();
+ptrAnch[0]=[35,218];
+ptrAnch[1]=[135,233];
+ptrAnch[2]=[321,188];
+ptrAnch[3]=[617,182];
+ptrAnch[4]=[861,186];
+
+var bblDat=new Array();
+bblDat[0]="I could sure go for a beer!";
+bblDat[1]="There goes the beer maid!";
+bblDat[2]="They\'ll never find the beer cooler hidden in my tuba.";
+bblDat[3]="How many pints make a liter?";
+bblDat[4]="Lager? Pilsner? Just give me a beer!";
+
+var maxW  = document.getElementById("mainimg").width;
+
+var leftT = 0.12;
+var topT = 0.18;
+var widthT = 0.73;
+var heightT = 0.59;
+
+function checkTimeout() {
+  if (nextState != curState) {
+	if (curState != -1) { resetState(curState);}
+    if (nextState == -1) {
+	  curState = -1;
+	  timerIsOn = false;
+	}
+	else {
+	  timer = setTimeout(function(){checkTimeout()},TIMER_DELAY);
+	  curState = nextState;
+	  changeState(curState)
+	}
+  }
+  else {
+	timerIsOn = false;
+  }
+}
+
+function updateNext(n) {
+  nextState = n;
+  if (!timerIsOn && curState != n) {
+    timerIsOn = true;
+	timer = setTimeout(function(){checkTimeout()},TIMER_DELAY);
+	if (curState != -1) { resetState(curState); }
+    curState = nextState;
+	changeState(curState);
+  }
+}
+
+function changeState(n) {
+//resetAll();
+var test = document.getElementById("p0");
+test.innerHTML = bblDat[n];
+var wdth = test.offsetWidth + 1;
+var hght = test.offsetHeight + 1;
+var bbliv = document.getElementById("bbli");
+var bblTxt = document.getElementById("bblp");
+var bblw = wdth/widthT;
+var bblh = hght/heightT;
+bbliv.width = bblw;
+bbliv.height = bblh;
+var bblTxtLstr = (bblw*leftT) + "px"
+var bblTxtTstr = (bblh*topT).toFixed() + "px"
+bblTxt.style.left = bblTxtLstr;
+bblTxt.style.top = bblTxtTstr;
+var bblpv = document.getElementById("bblp");
+bblpv.style.width = wdth + "px";
+bblpv.style.height = hght + "px";
+var bbldv = document.getElementById("bbld");
+bbldv.style.width = bblw.toFixed() + "px";
+bbldv.style.height = bblh.toFixed() + "px";
+var ptrnrml = [20, 18, 25, 22, 30, 26];
+var slopeFactor = 0.5;
+if (ptrAnch[n][0] > maxW/2) slopeFactor *= -1;
+var x = ptrAnch[n][0] - ptrnrml[0]*slopeFactor;
+var y = ptrAnch[n][1];
+
+for (var i=0; i<6; i+=2) {
+  x = Number((x + ptrnrml[i]*slopeFactor).toFixed());
+  y = y - ptrnrml[i+1];
+  bblptr[n][i].style.left = x + "px";
+  bblptr[n][i].style.top = y + "px";
+  bblptr[n][i].style.width = ptrnrml[i] + "px";
+  bblptr[n][i].style.height = ptrnrml[i+1] + "px";
+  bblptr[n][i+1].style.left = 0;
+  bblptr[n][i+1].style.top = 0;
+  bblptr[n][i+1].width = ptrnrml[i];
+  bblptr[n][i+1].height = ptrnrml[i+1];
+  }
+if (slopeFactor < 0) {
+  if (x > 0.9*bblw) {
+    bbldv.style.left = (x - Number((parseInt(0.9*bblw)).toFixed())) + "px";
+	}
+  else {
+    bbldv.style.left = "0px";
+	}
+  }
+else {
+  if (bblw + x > maxW) {
+    bbldv.style.left =  (maxW - bblw) + "px";
+    }
+  else {
+    bbldv.style.left = x + "px";
+	}
+  }
+bbldv.style.top = (y - (parseInt(bbldv.style.height))) + "px";
+bblptr[n][0].style.visibility = "visible";
+setTimeout(function(){bblptr[n][2].style.visibility = "visible"},150);
+setTimeout(function(){bblptr[n][4].style.visibility = "visible"},300);
+setTimeout(function(){bbldv.style.visibility = "visible"},450);
+bblTxt.innerHTML = bblDat[n];
+}
+
+function resetAll() {
+document.getElementById("bbld").style.visibility="hidden";
+for (var i = 0; i < 5; i++) {
+  for (var ix = 0; ix < 6; ix+=2) {
+    bblptr[i][ix].style.visibility="hidden";
+	}
+  }
+}
+
+function resetState(i) {
+document.getElementById("bbld").style.visibility="hidden";
+for (var ix = 0; ix < 6; ix+=2) {
+  bblptr[i][ix].style.visibility="hidden";
+  }
+}
+</script>
+</body>
+</html>
