@@ -1,0 +1,141 @@
+<html>
+<head>
+<script>
+/**
+ * Tokenizer/jQuery.Tokenizer
+ * Copyright (c) 2007-2008 Ariel Flesler - aflesler(at)gmail(dot)com | http://flesler.blogspot.com
+ * Dual licensed under MIT and GPL.
+ * Date: 2/29/2008
+ *
+ * @projectDescription JS Class to generate tokens from strings.
+ * http://flesler.blogspot.com/2008/03/string-tokenizer-for-javascript.html
+ *
+ * @author Ariel Flesler
+ * @version 1.0.1
+ */
+;(function(){
+  
+  var Tokenizer = function( tokenizers, doBuild ){
+    if( !(this instanceof Tokenizer ) )
+      return new Tokenizer( tokenizers, onEnd, onFound );
+      
+    this.tokenizers = tokenizers.splice ? tokenizers : [tokenizers];
+    if( doBuild )
+      this.doBuild = doBuild;
+  };
+  
+  Tokenizer.prototype = {
+    parse:function( src ){
+      this.src = src;
+      this.ended = false;
+      this.tokens = [ ];
+      do this.next(); while( !this.ended );
+      return this.tokens;
+    },
+    build:function( src, real ){
+      if( src )
+        this.tokens.push(
+          !this.doBuild ? src :
+          this.doBuild(src,real,this.tkn)
+        );  
+    },
+    next:function(){
+      var self = this,
+        plain;
+        
+      self.findMin();
+      plain = self.src.slice(0, self.min);
+      
+      self.build( plain, false );
+        
+      self.src = self.src.slice(self.min).replace(self.tkn,function( all ){
+        self.build(all, true);
+        return '';
+      });
+      
+      if( !self.src )
+        self.ended = true;
+    },
+    findMin:function(){
+      var self = this, i=0, tkn, idx;
+      self.min = -1;
+      self.tkn = '';
+      
+      while(( tkn = self.tokenizers[i++]) !== undefined ){
+        idx = self.src[tkn.test?'search':'indexOf'](tkn);
+        if( idx != -1 && (self.min == -1 || idx < self.min )){
+          self.tkn = tkn;
+          self.min = idx;
+        }
+      }
+      if( self.min == -1 )
+        self.min = self.src.length;
+    }
+  };
+  
+  if( window.jQuery ){
+    jQuery.tokenizer = Tokenizer;//export as jquery plugin
+    Tokenizer.fn = Tokenizer.prototype;
+  }else
+    window.Tokenizer = Tokenizer;//export as standalone class
+  
+})();
+</script>
+</head>
+<body>
+<h2>Moodle GIFT format question generator</h2>
+<textarea id="intext" style="width:600px;max-width:90%;height:200px">Enter or paste text here.</textarea><br>
+<button type="button" onclick="parseAndDisplay()">Generate questions</button>
+<div id="outext" style="font:bold 1em monospace;background-color:#ddd"></div>
+<script>
+var rows = [],
+  row = /*rows[0] = */[ ];
+  
+var prepSplitter = new Tokenizer( [ /\babove\b/, /\bacross\b/, /\bafter\b/, /\bagainst\b/, /\balong\b/, /\balongside\b/, /\bamong\b/, /\baround\b/, /\bat\b/, /\bbefore\b/, /\bbehind\b/, /\bbelow\b/, /\bbeneath\b/, /\bbeside\b/, /\bbetween\b/, /\bbeyond\b/, /\bby\b/, /\bduring\b/, /\bexcept\b/, /\bexcluding\b/, /\bfollowing\b/, /\bfor\b/, /\bfrom\b/, /\bin\b/, /\bincluding\b/, /\binside\b/, /\binto\b/, /\blike\b/, /\bminus\b/, /\bnear\b/, /\bof\b/, /\boff\b/, /\bon\b/, /\bonto\b/, /\bopposite\b/, /\bout\b/, /\boutside\b/, /\bover\b/, /\bpast\b/, /\bplus\b/, /\bthrough\b/, /\bthroughout\b/, /\btill\b/, /\bto\b/, /\btoward\b/, /\btowards\b/, /\bunder\b/, /\bunderneath\b/, /\buntil\b/, /\bup\b/, /\bupon\b/, /\bwith\b/, /\bwithin\b/, /\bwithout\b/, '.']);
+</script>
+<script>
+function parseAndDisplay() {
+var tokens = prepSplitter.parse(document.getElementById('intext').value);
+var periodIndexes = [ ]
+var rows = [ ],
+  row = [ ]
+var i, j, k
+for (i in tokens){
+  if (tokens[i] == '.') {
+    periodIndexes[periodIndexes.length] = i;
+  }
+}
+j = 0
+for (i in periodIndexes){
+  if (Number(j)+2 <= periodIndexes[i]) {
+  if (tokens[periodIndexes[i]-2].trim() == tokens[periodIndexes[i]-2]) {
+    row[0] = ""
+    for (k = j; k < periodIndexes[i]-2; k++) {
+    row[0] += tokens[k]
+    }
+    row[0] = row[0].trim()
+    row[1] = ""
+    for (k = periodIndexes[i]-2; k <= periodIndexes[i]; k++) {
+    row[1] += tokens[k]
+    }
+    rows.push(row);
+    row = [ ]
+  }
+  }
+  j = Number(periodIndexes[i]) + 1
+  }
+  for (i in rows) {
+  document.getElementById("outext").innerHTML += "<br>" + rows[i][0]
+  document.getElementById("outext").innerHTML += "<br>{"
+  document.getElementById("outext").innerHTML += "<br>&nbsp;&nbsp;= " + rows[i][1]
+  for (j in rows) {
+    if (i != j) {
+    document.getElementById("outext").innerHTML += "<br>&nbsp;&nbsp;~ " + rows[j][1]
+    }
+  }
+  document.getElementById("outext").innerHTML += "<br>}<br>"
+  }
+}
+</script>
+</body>
+</html>
