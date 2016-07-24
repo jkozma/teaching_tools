@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Grading Rubric</title>
+</head>
+<body>
+<h3>Rubric for Unit 2 Review Assignment</h3>
+<div id="rubricform"></div>
+<p><button onclick="showFeedback()">Show Feedback</button></p>
+<p style="background-color: #eee;" id="output"></p>
+<script type="text/javascript">// <![CDATA[
+var rubric = document.createElement("table");
+	  var n = 0;
+	  rubric.style.border="2px solid gray";
+	  rubric.style.borderCollapse="collapse";
+	  document.getElementById("rubricform").appendChild(rubric);
+	  var rubricHeadRow = rubric.insertRow(n++);
+	  var rubricHeadCriteria = rubricHeadRow.insertCell(0);
+	  rubricHeadCriteria.style.border="1px solid gray";
+	  rubricHeadCriteria.style.textAlign="center";
+	  rubricHeadCriteria.style.fontWeight="bold";
+	  rubricHeadCriteria.style.padding="5px";
+	  rubricHeadCriteria.innerHTML = "Criteria";
+	  var rubricHeadScore = rubricHeadRow.insertCell(1);
+	  rubricHeadScore.style.border="1px solid gray";
+	  rubricHeadScore.style.textAlign="center";
+	  rubricHeadScore.style.fontWeight="bold";
+	  rubricHeadScore.style.padding="5px";
+	  rubricHeadScore.innerHTML = "Score";
+	  var rubricHeadComments = rubricHeadRow.insertCell(2);
+	  rubricHeadComments.style.border="1px solid gray";
+	  rubricHeadComments.style.textAlign="center";
+	  rubricHeadComments.style.fontWeight="bold";
+	  rubricHeadComments.style.padding="5px";
+	  rubricHeadComments.innerHTML = "<strong>Comments</strong><br />Hold down Ctrl to select multiple comments from list.<br />Enter additional comments in text area.";
+	  var criteria = new Array();
+		criteria[0] = ["Chapter 8<br>1. business ethics",10 , ["missing", "Avoid direct copying", "Use quotes for directly copied material", "Cite all sources", "Include page references from text", "Spelling, grammar", "Accuracy, detail"]];
+		criteria[1] = ["2. social responsibility", 10, ["missing", "Avoid direct copying", "Use quotes for directly copied material", "Cite all sources", "Include page references from text", "Spelling, grammar", "Accuracy, detail"]];
+		criteria[2] = ["3. code of ethics, purpose", 10, ["missing", "Avoid direct copying", "Use quotes for directly copied material", "Cite all sources", "Include page references from text", "Spelling, grammar", "Accuracy, detail"]];
+		criteria[3] = ["Chapter 10<br>4. contract, general definition", 10, ["missing", "Avoid direct copying", "Use quotes for directly copied material", "Cite all sources", "Include page references from text", "Spelling, grammar", "Accuracy, detail"]];
+		criteria[4] = ["5. classifications of contracts", 10, ["missing", "Avoid direct copying", "Use quotes for directly copied material", "Cite all sources", "Include page references from text", "Spelling, grammar", "Accuracy, detail"]];
+		criteria[5] = ["6. contract elements", 10, ["missing", "Avoid direct copying", "Use quotes for directly copied material", "Cite all sources", "Include page references from text", "Spelling, grammar", "Accuracy, detail"]];
+		criteria[6] = ["Chapter 11<br>7. contract, discharge", 10, ["missing", "Avoid direct copying", "Use quotes for directly copied material", "Cite all sources", "Include page references from text", "Spelling, grammar", "Accuracy, detail"]];
+		criteria[7] = ["8. breach of contract", 10, ["missing", "Avoid direct copying", "Use quotes for directly copied material", "Cite all sources", "Include page references from text", "Spelling, grammar", "Accuracy, detail"]];
+		criteria[8] = ["9. remedies for breach of contract", 10, ["missing", "Avoid direct copying", "Use quotes for directly copied material", "Cite all sources", "Include page references from text", "Spelling, grammar", "Accuracy, detail"]];
+		criteria[9] = ["Chapter 12<br>10. tort law, importance for businesses", 10, ["missing", "Avoid direct copying", "Use quotes for directly copied material", "Cite all sources", "Include page references from text", "Spelling, grammar", "Accuracy, detail"]];
+	  var rubricRows = new Array();
+	  var rubricData = new Array();
+	  for (var i = 0; i < criteria.length; i++) {
+		rubricRows[i] = rubric.insertRow(n++);
+		rubricData[i] = new Array();
+		for (var j = 0; j < 3; j++) {
+		  rubricData[i][j] = rubricRows[i].insertCell(j);
+		  rubricData[i][j].style.border="1px solid gray";
+		  rubricData[i][j].style.padding="5px";
+		}
+		rubricData[i][0].innerHTML = criteria[i][0];
+		var selobj = document.createElement("select");
+		rubricData[i][1].appendChild(selobj);
+		var optobj = document.createElement("option");
+		optobj.value = criteria[i][1];
+		optobj.innerHTML = criteria[i][1].toString();
+		optobj.selected = "selected";
+		selobj.appendChild(optobj);
+		for (var j = criteria[i][1] - 1; j > -1; j--) {
+		  optobj = document.createElement("option");
+		  optobj.value = j;
+		  optobj.innerHTML = j.toString();
+		  selobj.appendChild(optobj);
+		}
+		rubricData[i][1] = selobj;
+		selobj = null;
+		if (criteria[i][2].length > 0) {
+		  selobj = document.createElement("select");
+		  selobj.multiple="multiple";
+		  //selobj.size="1";
+		  rubricData[i][2].appendChild(selobj);
+		  for (var k in criteria[i][2]) {
+			var optobj = document.createElement("option");
+			optobj.value = criteria[i][2][k];
+			optobj.innerHTML = criteria[i][2][k];
+			selobj.appendChild(optobj);
+		  }
+		}
+		var txtobj = document.createElement("textarea");
+		txtobj.style.display="block"
+		rubricData[i][2].appendChild(txtobj);
+		rubricData[i][2] = new Array();
+		rubricData[i][2][0] = selobj;
+		rubricData[i][2][1] = txtobj;		  
+		}
+
+		function showFeedback() {
+		/*
+		rubricData[i][0].innerHTML contains criteria name
+		rubricData[i][1].value contains score
+		rubricData[i][2][0] points to multiple select with selected comments
+		rubricData[i][2][1] points to text area with additional comments
+		*/
+		var score = 0;
+		var maxScore = 0;
+		var feedback = "";
+		var ind = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+		for (var i in rubricData) {
+		  feedback += rubricData[i][0].innerHTML + ": " + rubricData[i][1].value + "/" + rubricData[i][1][0].value + "<br>";
+		  score += +rubricData[i][1].value;
+		  maxScore += +rubricData[i][1][0].value;
+		  if (rubricData[i][2][0] != null) {
+			for (var j = 0; j < rubricData[i][2][0].length; j++) {
+			  if (rubricData[i][2][0][j].selected) {
+				feedback += ind + rubricData[i][2][0][j].value + "<br>";
+			  }
+			}
+		  }
+		  if (rubricData[i][2][1].value != "") {
+			feedback += ind + rubricData[i][2][1].value + "<br>";
+		  }
+		}
+		feedback += "Total Score: " + score + "/" + maxScore;
+		document.getElementById("output").innerHTML = feedback;
+	  }
+// ]]></script>
+</body>
+</html>
